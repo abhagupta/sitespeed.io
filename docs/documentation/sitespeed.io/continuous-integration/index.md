@@ -1,10 +1,11 @@
 ---
 layout: default
-title: Continuous integration - Documentation - sitespeed.io
+title: Run sitespeed.io in your continuous integration
 description: Use sitespeed.io in your Continuous Integration setup with Jenkins, Grunt or Team City.
 keywords:  Continuous Integration, jenkins, grunt, team city, documentation, web performance, sitespeed.io
 author: Peter Hedenskog
 nav: documentation
+category: sitespeed.io
 image: https://www.sitespeed.io/img/sitespeed-2.0-twitter.png
 twitterdescription: Use sitespeed.io in your Continuous Integration setup.
 ---
@@ -30,11 +31,11 @@ The most convenient way to run in Jenkins is to use the pre-built Docker contain
 * We then map the Jenkins workspace's output folder in Docker to the Host, so that the HTML result is visible outside of the container.
 
 ~~~bash
-docker run --privileged -v ${WORKSPACE}:/sitespeed.io sitespeedio/sitespeed.io --outputFolder output https://www.sitespeed.io/ -n 1
+docker run -v ${WORKSPACE}:/sitespeed.io sitespeedio/sitespeed.io --outputFolder output https://www.sitespeed.io/ -n 1
 ~~~
 
-* You can then install the **Publish HTML Reports** plugin to make the reports easy available in Jenkins. You can add it as a *Post-build Actions* and set the **HTML directory to archive** to *${WORKSPACE}/output/*.
-![HTML reports]({{site.baseurl}}/img/html-reports.png)
+* You can then install the **Publish HTML Reports** plugin to make the reports easy available in Jenkins. You can add it as a *Post-build Actions* and set the **HTML directory to archive** to *output/* (it is relative to the workspace).
+![HTML reports]({{site.baseurl}}/img/html-publisher.png)
 {: .img-thumbnail}
 
  The HTML result pages runs Javascript, so you need to change the [Jenkins Content Security Policy](https://wiki.jenkins-ci.org/display/JENKINS/Configuring+Content+Security+Policy) for them to work with the plugin.
@@ -44,7 +45,7 @@ docker run --privileged -v ${WORKSPACE}:/sitespeed.io sitespeedio/sitespeed.io -
 * If you want to break your build, you should generate a JUnit XML and use the built-in post task *Publish JUnit test result report*. Make sure to make the budget file available inside the Docker container. In this example we have it inside the Jenkins workspace.
 
 ~~~bash
-docker run --privileged -v ${WORKSPACE}:/sitespeed.io sitespeedio/sitespeed.io --outputFolder output --budget /sitespeed.io/budget.json --budget.output junit https://www.sitespeed.io/ -n 1
+docker run -v ${WORKSPACE}:/sitespeed.io sitespeedio/sitespeed.io --outputFolder output --budget /sitespeed.io/budget.json --budget.output junit https://www.sitespeed.io/ -n 1
 ~~~
 
 * Setup the JUnit report:
@@ -57,7 +58,7 @@ Remember that you can also send the metrics to Graphite to keep a closer eye on 
 We have an example project for setting up Travis [https://github.com/sitespeedio/travis/](https://github.com/sitespeedio/travis/blob/master/.travis.yml). You should not try to use timings in your budget, simply because they tend to vary and be highly unreliable. We suggest using metrics that do not vary greatly and will be the same between runs like Coach score or number of requests.
 
 ## Grunt plugin
-Checkout the [grunt plugin](https://github.com/sitespeedio/grunt-sitespeedio)!
+Checkout the [grunt plugin](https://github.com/sitespeedio/grunt-sitespeedio).
 
 ## Gulp plugin
-Checkout Ankit Singhals [gulp plugin](https://github.com/dreamzmaster/gulp-sitespeedio) (hopefully supporting sitespeed.io 4.0 soon).
+Checkout Ankit Singhals [gulp plugin](https://github.com/dreamzmaster/gulp-sitespeedio).

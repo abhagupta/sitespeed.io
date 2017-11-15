@@ -1,7 +1,9 @@
-FROM sitespeedio/webbrowsers:firefox-54.0-chrome-60.0.3112.40-beta-2
+FROM sitespeedio/webbrowsers:firefox-54.0-chrome-62.0-chrome-beta-3
 
 ENV SITESPEED_IO_BROWSERTIME__XVFB true
-ENV SITESPEED_IO_BROWSERTIME__CHROME__ARGS no-sandbox
+ENV SITESPEED_IO_BROWSERTIME__DOCKER true
+ENV SITESPEED_IO_BROWSERTIME__VIDEO true
+ENV SITESPEED_IO_BROWSERTIME__speedIndex true
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app

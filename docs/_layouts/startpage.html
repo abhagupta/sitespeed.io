@@ -42,18 +42,30 @@ layout: compress
 <link rel="shortcut icon" href="{{site.baseurl}}/img/ico/sitespeed.io.ico">
 
 	<style>{% include css/default.css %}</style>
-	<script type="text/javascript">{% include userTimings.js %}</script>
-	{% include analythics.js %}
 </head>
 <body>
 	{% include header.html %}
 
 	<div class="grid">
 		<div class="col-1-1">
-			{{ content }}
+    <div class="col-1-2">
+     {% capture logo %}{% include index/logo.md %}{% endcapture %}
+   		{{ logo | markdownify }}
+    </div>
+   <div class="col-1-2">
+    {{ content }}
+   </div>
 		</div>
-
 </div>
+<div class="white">
+<div class="grid">
+	<div class="col-1-1">
+		{% capture install %}{% include index/install.md %}{% endcapture %}
+		{{ install | markdownify }}
+	</div>
+</div>
+</div>
+
 <div class="white">
 	<div class="grid">
 		<div class="col-1-2">

@@ -1,9 +1,126 @@
 # CHANGELOG - sitespeed.io
 
-## UNRELEASED
+## UNRELEASED 6.0 ALPHA
 
-### Fixed 
+We plan to release 6.0 sometimes after Firefox 57 is released (November 14?).
+
+### Added
+* Use Chartist to display visual progress and size/requests to make it easier for users [#1659](https://github.com/sitespeedio/sitespeed.io/pull/1659).
+
+* The HTML pages now works better on larger screens [#1740](https://github.com/sitespeedio/sitespeed.io/pull/1740).
+
+* We upgraded to use the official Graphite Docker container and using Graphite 1.X as default [#1735](https://github.com/sitespeedio/sitespeed.io/pull/1735).
+
+* Log the full URL to your result, makes it easy to map logs vs result  [#1744](https://github.com/sitespeedio/sitespeed.io/issues/1744).
+
+* Make it easier do build plugins: Expose messageMaker in the context to plugins (so plugins easily can send messages in the queue) [#1760](https://github.com/sitespeedio/sitespeed.io/pull/1760). Expose filterRegistry in
+the context so plugins can register which metrics should be picked up by Graphite/InfluxDb etc [#1761](https://github.com/sitespeedio/sitespeed.io/pull/1761). Move core functionality to core folder [#1762](https://github.com/sitespeedio/sitespeed.io/pull/1762).
+
+* Running Docker adds --video and --speedIndex by default to make it easier for beginners.
+
+* You can now create plugins that can generate HTML (per run or per page summary). [#1784](https://github.com/sitespeedio/sitespeed.io/pull/1784).
+
+* You can now override/add CSS from your plugin by sending message of the type *html.css* [#1787](https://github.com/sitespeedio/sitespeed.io/pull/1787)
+
+* Major work on the documentation: [https://www.sitespeed.io/](https://www.sitespeed.io/)
+
+### Bug fixes
+* We finally exit with 1 (error) if one of the URLs fails.[#1267](https://github.com/sitespeedio/sitespeed.io/issues/1267) and [#1779](https://github.com/sitespeedio/sitespeed.io/pull/1779).
+
+
+### Deprecations
+* The --plugins.load and -plugins.disable options are deprecated in favor of --plugins.add and -plugins.remove. The previous syntax was cumbersome to use since it allowed for multiple plugins to be separated by space. When using it before the url argument, e.g.
+```sh
+sitespeed.io -plugins.load foo http://sitespeed.io
+```
+the url would be treated as a plugin name, and the command would fail.
+
+### Breaking changes
+* Update to PageXray 1.0. For 99% of the users this will not change anything but if you where sending assets timings to Graphite/InfluxDB (as we told you not to do, these you now get blocked, dns, connect, send, wait and receive instead of just the total time [#1693](https://github.com/sitespeedio/sitespeed.io/pull/1693).
+
+* We removed the generic [DataCollector](https://github.com/sitespeedio/sitespeed.io/blob/5.x/lib/plugins/datacollector/index.js) that collected data for each run and instead each plugin should collect the data
+it needs [#1731](https://github.com/sitespeedio/sitespeed.io/pull/1731). If you have written a plugin that collect it owns
+data you can just follow the old [DataCollector structure](https://github.com/sitespeedio/sitespeed.io/blob/5.x/lib/plugins/datacollector/index.js) and move the code you need to your plugin. Also [#1767](https://github.com/sitespeedio/sitespeed.io/pull/1767) is a follow up to remove DataCollector.
+
+* We now default to Graphite 1.x so if you send annotations to Graphite < 1.0 you need to configure arrayTags to false *--graphite.arrayTags false*
+
+* We now output only the version number (and not package and version number) on --version.
+
+* As a first step to make it possible for plugins to generate HTML, we removed the hooks and instead only communicates with messages see: [#1732](https://github.com/sitespeedio/sitespeed.io/pull/1732) [#1758](https://github.com/sitespeedio/sitespeed.io/pull/1758). We now have three messages sent by the queue:
+*sitespeedio.setup* - The first message on the queue. A plugin can pickup this message and communicate with other plugins (send pugs to the HTML plugin, send JavaScript to Browsertime etc). The next message is *sitespeedio.summarize* (old summarize) that tells the plugins that all URLs are analysed and you can now summarise the metrics. The last message is *sitespeedio.render* which tells the plugins to render content to disk. The HTML plugin pickup *sitespeedio.render*, render the HTML and then sends a *html.finished* message, that then other plugins can pickup.
+
+## 5.6.4 2017-10-11
+### Fixed
+* Upgraded to Browsertime 1.9.4 with latest Chromedriver that fixes launching Chrome > 61
+* Fixed custom metrics problem with WebPageTest [#1737](https://github.com/sitespeedio/sitespeed.io/issues/1737)
+
+## 5.6.3 2017-10-03
+### Fixed
+* Fix issue where coach, pagexray and browsertime data on summary pages might contain just a subset of data for tests with urls from multiple domains.
+* Avoid crash if Google PageSpeed Insights request fails (e.g. due to incorrect API key).
+* When you run sitespeed.io using Docker we now always set no-sandbox to Chrome (so you don't need to do that yourself).
+* Custom metrics in WebPageTest broke the HTML [#1722](https://github.com/sitespeedio/sitespeed.io/issues/1722)
+* Skip storing faulty toplists on disk when using the analysisstorer plugin. The lists is generated from the raw data, so if you need them yourself as JSON, you can generate them [#1721](https://github.com/sitespeedio/sitespeed.io/pull/1721)
+* Upgraded to latest shining [Browsertime](https://github.com/sitespeedio/browsertime/blob/master/CHANGELOG.md#version-193-2017-09-29)
+
+## 5.6.2 2017-09-17
+### Fixed
+* Rollbacked to Chrome 60 to fix the flicker that happens on emulated mobile and makes lastVisualChange happens later than it should [#367](https://github.com/sitespeedio/browsertime/issues/367).
+* Better logs when using WebPageTest.
+* More finetuning in Browsertime (1.8.1) to pickup right last visual change on emulated mobile for Chrome.
+
+## 5.6.1 2017-09-15
+### Fixed
+* Showing the timer as default in the video that was accidentally changed in latest release. Thanks https://github.com/kkopachev for reporting!
+
+## 5.6.0 2017-09-13
+
+### Added
+* Use load time as of the default metrics for data storage when you use WebPageTest [#1704](https://github.com/sitespeedio/sitespeed.io/issues/1704)
+* Upgraded Browsertime to 1.8.0 with [all these changes](https://github.com/sitespeedio/browsertime/blob/master/CHANGELOG.md#version-180-2017-09-13)
+
+### Fixed
+* You can now run WebPageTest without Browsertime [#1700](https://github.com/sitespeedio/sitespeed.io/issues/1700).
+* Use SpeedIndex to decide if a WebPageTest run works instead of fullyLoaded [#1699](https://github.com/sitespeedio/sitespeed.io/pull/1699)
+
+## 5.5.0 2017-08-21
+### Fixed
+* Show in the CLI that requestheaders, blocking domains and basic auth work in Firefox.
+* Upgraded to Browsertime 1.6.1 with a newer version of VisualMetrics that hopefully fixes the sometimes 0 metrics for some sites. [#1961](https://github.com/sitespeedio/sitespeed.io/issues/1691)
+
+### Added
+* Include firstParty info in the HAR (more info about this soon).
+* Also slack the screenshot of the run [#1658](https://github.com/sitespeedio/sitespeed.io/pull/1658).
+
+## 5.4.5 2017-08-03
+### Fixed
+* Upgrading the Docker container to use Chrome stable 60 (instead of beta 60)
+* Upgrading to Browsertime 1.6.0 that gives support for adding request headers, blocking domains and basic auth in Firefox.
+* When one WebPageTest run failed, it could break collecting metrics, it seems to happen on sites with many requsts. We now catch the error. See [#1685](https://github.com/sitespeedio/sitespeed.io/issues/1685).
+* Upgraded to Coach 0.36.0
+
+## 5.4.4 2017-07-21
+### Fixed
+* Upgrading node-sass to work when installing on Windows 10 [#1671](https://github.com/sitespeedio/sitespeed.io/issues/1671)
+* Upgrading to Browsertime 1.5.4 checkout [https://github.com/sitespeedio/browsertime/blob/master/CHANGELOG.md#version-154-2017-07-19](https://github.com/sitespeedio/browsertime/blob/master/CHANGELOG.md#version-154-2017-07-19)
+* Always add the first asset to the size list [#1676](https://github.com/sitespeedio/sitespeed.io/issues/1676)
+
+## 5.4.3 2017-07-14
+### Fixed
+* 5.4.2 failed with NodeJS 6.11.1 since our base Docker container didn't include npm. This is fixed now and we use 6.11.1.
+
+## 5.4.2 2017-07-13
+### Fixed
+* Docker container uses NodeJS 6.11.1
+* Latest Chrome beta 60.0.3112.66 in Docker
+* Set 6.11.1 as minimum engine.
+
+## 5.4.1 2017-06-30
+
+### Fixed
 * Updated the Docker container to contain fonts for Hindi, Thai, Japanese, Chinese and Korean.
+
+* Updated to Browsertime 1.5.3 that includes a fix for faulty content types when getting the Chrome HAR file [#1654](https://github.com/sitespeedio/sitespeed.io/issues/1654)
 
 ## 5.4.0 2017-06-24
 ### Added

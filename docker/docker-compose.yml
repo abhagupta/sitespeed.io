@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
     sitespeed.io:
       image: sitespeedio/sitespeed.io
@@ -8,7 +8,7 @@ services:
       volumes:
             - ./sitespeed-result/:/sitespeed.io/sitespeed-result
     grafana:
-      image: grafana/grafana:4.3.1
+      image: grafana/grafana:4.6.1
       depends_on:
         - graphite
       links:
@@ -25,13 +25,17 @@ services:
         - grafana:/var/lib/grafana
       restart: always
     graphite:
-      image: sitespeedio/graphite
+      image: sitespeedio/graphite:1.0.2-2-b
       ports:
         - "2003:2003"
         - "8080:80"
       restart: always
       volumes:
-        - graphite:/opt/graphite/storage/whisper
+        - whisper:/opt/graphite/storage/whisper
+        #- ./graphite/graphite.db:/opt/graphite/storage/graphite.db
+        #- ./graphite/conf/storage-schemas.conf:/opt/graphite/conf/storage-schemas.conf
+        #- ./graphite/conf/storage-aggregation.conf:/opt/graphite/conf/storage-aggregation.conf
+        #- ./graphite/conf/carbon.conf:/opt/graphite/conf/carbon.conf
     grafana-setup:
       image: sitespeedio/grafana-bootstrap:sitespeed.io-4.6
       links:
@@ -41,4 +45,4 @@ services:
         - GF_USER=sitespeedio
 volumes:
     grafana:
-    graphite:
+    whisper:
